@@ -9,10 +9,36 @@ generator client {
 }
 
 model employer {
-  // created a dummy table to make sure it works
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  name          String   @db.VarChar(255)
+  id            Int              @id @default(autoincrement())
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  name          String           @db.VarChar(255)
   employeeCount Int
+  payment       paymentHistory[]
+  starRating    Int              @default(0)
+  rating        Int              @default(0)
+}
+
+model paymentHistory {
+  id          Int           @id @default(autoincrement())
+  paymentDate DateTime?     @default(now())
+  updatedAt   DateTime      @updatedAt
+  amount      Float?
+  year        Int
+  month       Int
+  dueDate     DateTime
+  employer    employer      @relation(fields: [employerId], references: [id])
+  employerId  Int
+  status      paymentStatus @default(never_paid)
+
+  // Unique constraint on employer, year, and month
+  @@unique([employerId, year, month])
+  @@index([employerId])
+}
+
+enum paymentStatus {
+  on_time
+  never_paid
+  late_within_3_months
+  late_3_months_after
 }
