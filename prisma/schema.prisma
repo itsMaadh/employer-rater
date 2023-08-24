@@ -21,7 +21,8 @@ model employer {
 
 model paymentHistory {
   id          Int           @id @default(autoincrement())
-  paymentDate DateTime?     @default(now())
+  createdAt   DateTime      @default(now())
+  paymentDate DateTime?
   updatedAt   DateTime      @updatedAt
   amount      Float?
   year        Int
