@@ -219,9 +219,9 @@ export default function ReportsPage() {
         (paymentHistory.length > 0 || employers.length > 0) && (
           <ReactPaginate
             breakLabel="..."
+            marginPagesDisplayed={1}
             nextLabel=">"
             onPageChange={onPageChange}
-            pageRangeDisplayed={5}
             pageCount={totalCount / LIMIT}
             previousLabel="<"
             renderOnZeroPageCount={null}
@@ -239,6 +239,7 @@ export default function ReportsPage() {
             activeLinkClassName={`${buttonVariants({
               variant: "default",
             })} mx-1`}
+            breakClassName="flex items-center"
           />
         )}
 
