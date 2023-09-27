@@ -37,7 +37,7 @@ export const TopEmployersCard = ({
               .join("")
               .slice(0, 2)
             return (
-              <div key={employer.id} className="flex items-center">
+              <div key={employer.id} className="flex items-center md:flex-row">
                 <Avatar>
                   <AvatarImage
                     src="https://github.com/itsmaadhs.png"
@@ -53,13 +53,13 @@ export const TopEmployersCard = ({
                     {employer.employeeCount} employees
                   </p>
                 </div>
-                <div className="ml-auto flex items-center">
+                <div className="ml-auto flex flex-col items-center md:flex-row">
                   <StarRating rating={employer.starRating} />
-                  <p className="ml-2 text-sm font-bold text-gray-900 dark:text-white">
+                  <p className="ml-2 hidden text-sm font-bold text-gray-900 dark:text-white md:flex">
                     {employer.starRating}
                   </p>
-                  <span className="mx-1.5 h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400" />
-                  <p className="text-sm font-medium text-gray-900  dark:text-white">
+                  <span className="mx-1.5 hidden h-1 w-1 rounded-full bg-gray-500 dark:bg-gray-400 md:flex" />
+                  <p className="pt-1 text-sm font-medium text-gray-900  dark:text-white md:pt-0">
                     {employer.rating} points
                   </p>
                 </div>
