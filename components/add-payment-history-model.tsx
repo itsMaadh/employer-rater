@@ -38,9 +38,11 @@ const FormSchema = z.object({
   company: z.string({
     required_error: "Please select a company",
   }),
-  amount: z.coerce.number({
-    required_error: "Please enter an amount",
-  }),
+  amount: z.coerce
+    .number({
+      required_error: "Please enter an amount",
+    })
+    .positive(),
   year: z.coerce
     .number({
       required_error: "Please enter a year",
@@ -99,7 +101,7 @@ export const AddPaymentHistoryModel = ({
 
   return (
     <>
-      <Dialog open={isDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger>
           <span
             className={buttonVariants({ variant: "default" })}
