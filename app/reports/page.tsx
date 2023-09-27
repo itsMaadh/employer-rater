@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { formatDate } from "@/utils/format-date"
-import { Prisma, employer, paymentHistory } from "@prisma/client"
+import { Prisma, employer } from "@prisma/client"
+import ReactPaginate from "react-paginate"
 
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -24,7 +25,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -33,7 +33,7 @@ import {
 import { StarRating } from "@/components/star-rating"
 
 type OrderByValues = "payment-date" | "number-of-points"
-type ReportWithEmployerDetails = Prisma.paymentHistoryGetPayload<{
+type ReportWithPaymentDetails = Prisma.paymentHistoryGetPayload<{
   include: { employer: true }
 }>
 
@@ -46,10 +46,13 @@ enum PaymentStatus {
 
 export default function ReportsPage() {
   const [paymentHistory, setPaymentHistory] = useState<
-    ReportWithEmployerDetails[]
+    ReportWithPaymentDetails[]
   >([])
   const [employers, setEmployers] = useState<employer[]>([])
   const [orderBy, setOrderBy] = useState<OrderByValues | null>(null)
+  const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const LIMIT = 10
 
   useEffect(() => {
     if (!orderBy) return
@@ -58,14 +61,20 @@ export default function ReportsPage() {
       try {
         if (orderBy === "payment-date") {
           setEmployers([])
-          const fetchRequest = await fetch(`/api/reports/payment-history`)
+          const fetchRequest = await fetch(
+            `/api/reports/payment-history?page=${page}`
+          )
           const response = await fetchRequest.json()
-          setPaymentHistory(response)
+          setPaymentHistory(response.data)
+          setTotalCount(response.totalCount)
         } else {
           setPaymentHistory([])
-          const fetchRequest = await fetch(`/api/reports/employers`)
+          const fetchRequest = await fetch(
+            `/api/reports/employers?page=${page}`
+          )
           const response = await fetchRequest.json()
-          setEmployers(response)
+          setEmployers(response.data)
+          setTotalCount(response.totalCount)
         }
       } catch (err) {
         console.error(err)
@@ -73,10 +82,15 @@ export default function ReportsPage() {
     }
 
     fetchReports()
-  }, [orderBy])
+  }, [orderBy, page, totalCount])
 
-  async function onSubmit(data: OrderByValues) {
+  function onOrderBySubmit(data: OrderByValues) {
     setOrderBy(data)
+    setPage(1)
+  }
+
+  function onPageChange(data: { selected: number }) {
+    setPage(data.selected + 1)
   }
 
   return (
@@ -104,7 +118,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="pt-10">
-        <Select onValueChange={onSubmit}>
+        <Select onValueChange={onOrderBySubmit}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Order by" />
           </SelectTrigger>
@@ -118,7 +132,6 @@ export default function ReportsPage() {
       {paymentHistory.length > 0 && (
         <div className="py-8">
           <Table>
-            <TableCaption>Recent payment transactions</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
@@ -172,7 +185,6 @@ export default function ReportsPage() {
       {employers.length > 0 && (
         <div className="py-8">
           <Table>
-            <TableCaption>Recent payment transactions</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
@@ -198,6 +210,33 @@ export default function ReportsPage() {
           </Table>
         </div>
       )}
+
+      {totalCount > 0 &&
+        (paymentHistory.length > 0 || employers.length > 0) && (
+          <ReactPaginate
+            breakLabel="..."
+            nextLabel=">"
+            onPageChange={onPageChange}
+            pageRangeDisplayed={5}
+            pageCount={totalCount / LIMIT}
+            previousLabel="<"
+            renderOnZeroPageCount={null}
+            forcePage={page - 1}
+            className="flex justify-center"
+            pageLinkClassName={`${buttonVariants({
+              variant: "ghost",
+            })} mx-1`}
+            previousLinkClassName={`${buttonVariants({
+              variant: "ghost",
+            })} mx-1`}
+            nextLinkClassName={`${buttonVariants({
+              variant: "ghost",
+            })} mx-1`}
+            activeLinkClassName={`${buttonVariants({
+              variant: "default",
+            })} mx-1`}
+          />
+        )}
 
       {!paymentHistory.length && !employers.length && (
         <div className="pt-10">
