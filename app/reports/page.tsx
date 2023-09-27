@@ -169,11 +169,15 @@ export default function ReportsPage() {
                     <StarRating rating={payment.employer.starRating} />
                   </TableCell>
                   <TableCell>
-                    {payment.amount?.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "MVR",
-                      maximumFractionDigits: 0,
-                    })}
+                    {payment.amount ? (
+                      payment.amount.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "MVR",
+                        maximumFractionDigits: 0,
+                      })
+                    ) : (
+                      <Badge>Unpaid</Badge>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
