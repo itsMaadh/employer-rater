@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { formatDate } from "@/utils/format-date"
-import { Prisma } from "@prisma/client"
+import { Prisma, employer, paymentHistory } from "@prisma/client"
 
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -36,6 +36,7 @@ type OrderByValues = "payment-date" | "number-of-points"
 type ReportWithEmployerDetails = Prisma.paymentHistoryGetPayload<{
   include: { employer: true }
 }>
+
 enum PaymentStatus {
   never_paid = "Never paid",
   late_within_3_months = "Late within 3 months",
@@ -47,6 +48,7 @@ export default function ReportsPage() {
   const [paymentHistory, setPaymentHistory] = useState<
     ReportWithEmployerDetails[]
   >([])
+  const [employers, setEmployers] = useState<employer[]>([])
   const [orderBy, setOrderBy] = useState<OrderByValues | null>(null)
 
   useEffect(() => {
@@ -54,10 +56,17 @@ export default function ReportsPage() {
 
     async function fetchReports() {
       try {
-        console.log(orderBy)
-        const fetchRequest = await fetch(`/api/reports?order-by=${orderBy}`)
-        const response = await fetchRequest.json()
-        setPaymentHistory(response)
+        if (orderBy === "payment-date") {
+          setEmployers([])
+          const fetchRequest = await fetch(`/api/reports/payment-history`)
+          const response = await fetchRequest.json()
+          setPaymentHistory(response)
+        } else {
+          setPaymentHistory([])
+          const fetchRequest = await fetch(`/api/reports/employers`)
+          const response = await fetchRequest.json()
+          setEmployers(response)
+        }
       } catch (err) {
         console.error(err)
       }
@@ -106,7 +115,7 @@ export default function ReportsPage() {
         </Select>
       </div>
 
-      {paymentHistory.length > 0 ? (
+      {paymentHistory.length > 0 && (
         <div className="py-8">
           <Table>
             <TableCaption>Recent payment transactions</TableCaption>
@@ -143,8 +152,8 @@ export default function ReportsPage() {
                   <TableCell className="text-center">
                     {payment.employer.rating}
                   </TableCell>
-                  <TableCell className="text-center">
-                    <StarRating rating={payment.employer.rating} />
+                  <TableCell className="flex justify-center">
+                    <StarRating rating={payment.employer.starRating} />
                   </TableCell>
                   <TableCell>
                     {payment.amount?.toLocaleString("en-US", {
@@ -158,7 +167,39 @@ export default function ReportsPage() {
             </TableBody>
           </Table>
         </div>
-      ) : (
+      )}
+
+      {employers.length > 0 && (
+        <div className="py-8">
+          <Table>
+            <TableCaption>Recent payment transactions</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Employer name</TableHead>
+                <TableHead className="text-center">Employer points</TableHead>
+                <TableHead className="text-center">Employer stars</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employers.map((employer) => (
+                <TableRow>
+                  <TableCell>{employer.id}</TableCell>
+                  <TableCell className="font-medium">{employer.name}</TableCell>
+                  <TableCell className="text-center">
+                    {employer.rating}
+                  </TableCell>
+                  <TableCell className="flex justify-center">
+                    <StarRating rating={employer.starRating} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {!paymentHistory.length && !employers.length && (
         <div className="pt-10">
           <p className="text-center text-2xl text-gray-500">
             No payment history found

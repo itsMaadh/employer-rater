@@ -5,14 +5,10 @@ import prisma from "@/lib/prisma"
 export async function GET(request: Request) {
   const LIMIT = 10
   const { searchParams } = new URL(request.url)
-  const orderBy = searchParams.get("order-by") ?? "payment-date"
   const page = searchParams.get("page") ?? "1"
 
-  const paymentHistories = await prisma.paymentHistory.findMany({
-    orderBy:
-      orderBy === "payment-date"
-        ? { paymentDate: "desc" }
-        : { employer: { rating: "desc" } },
+  const data = await prisma.paymentHistory.findMany({
+    orderBy: { paymentDate: "desc" },
     skip: (Number(page) - 1) * LIMIT,
     take: LIMIT,
     include: {
@@ -20,5 +16,5 @@ export async function GET(request: Request) {
     },
   })
 
-  return NextResponse.json(paymentHistories)
+  return NextResponse.json(data)
 }
