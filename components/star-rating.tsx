@@ -11,8 +11,8 @@ export const StarRating = ({ rating }: StarRatingProps) => {
       {[...Array(5)].map((_, index) => (
         <svg
           key={index}
-          className={`text-${
-            index < filledStars ? "yellow-300" : "gray-300"
+          className={`${
+            index < filledStars ? "text-yellow-300" : "text-gray-300"
           } h-4 w-4`}
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
