@@ -2,11 +2,17 @@ import prisma from "@/lib/prisma"
 import { TopEmployersCard } from "@/components/top-employers-card"
 
 async function getTopPerformingEmployers() {
-  return await prisma.employer.findMany({ take: 5 })
+  return await prisma.employer.findMany({
+    take: 5,
+    orderBy: [{ starRating: "desc" }, { rating: "desc" }],
+  })
 }
 
 async function getWorstPerformingEmployers() {
-  return await prisma.employer.findMany({ take: 5 })
+  return await prisma.employer.findMany({
+    take: 5,
+    orderBy: [{ starRating: "asc" }, { rating: "asc" }],
+  })
 }
 
 export default async function IndexPage() {
@@ -18,7 +24,8 @@ export default async function IndexPage() {
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
         Dashboard
       </h1>
-      <div className="grid grid-cols-1 gap-8 py-8 md:grid-cols-2">
+
+      <div className="grid  grid-cols-1 gap-8 py-8 md:grid-cols-2">
         <TopEmployersCard
           title="Best performing employers"
           description="Top 5 employees with most stars and highest points"
