@@ -8,14 +8,6 @@ import ReactPaginate from "react-paginate"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -30,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AddPaymentHistoryModel } from "@/components/add-payment-history-model"
 import { StarRating } from "@/components/star-rating"
 
 type OrderByValues = "payment-date" | "number-of-points"
@@ -45,6 +38,7 @@ enum PaymentStatus {
 }
 
 export default function ReportsPage() {
+  const LIMIT = 10
   const [paymentHistory, setPaymentHistory] = useState<
     ReportWithPaymentDetails[]
   >([])
@@ -52,7 +46,6 @@ export default function ReportsPage() {
   const [orderBy, setOrderBy] = useState<OrderByValues | null>(null)
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
-  const LIMIT = 10
 
   useEffect(() => {
     if (!orderBy) return
@@ -93,28 +86,20 @@ export default function ReportsPage() {
     setPage(data.selected + 1)
   }
 
+  async function searchEmployerNames(
+    searchTerm: string
+  ): Promise<{ name: string; id: number }[]> {
+    const fetchRequest = await fetch(`/api/search?query=${searchTerm}`)
+    return await fetchRequest.json()
+  }
+
   return (
     <main className="container mx-auto py-8">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 items-center text-4xl font-extrabold tracking-tight lg:text-5xl">
           Reports
         </h1>
-        <Dialog>
-          <DialogTrigger>
-            <span className={buttonVariants({ variant: "default" })}>
-              Add payment
-            </span>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Are you sure absolutely sure?</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete your
-                account and remove your data from our servers.
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
+        <AddPaymentHistoryModel onSearch={searchEmployerNames} />
       </div>
 
       <div className="pt-10">
